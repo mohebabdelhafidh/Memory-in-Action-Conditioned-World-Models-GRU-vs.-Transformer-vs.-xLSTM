@@ -1,0 +1,30 @@
+name: xlstm_warm
+seed: 0
+core:
+  type: xlstm
+  dim: 288
+  hidden: 512
+  blocks: 2
+  heads: 4
+  context_length: 4096
+model:
+  latent_dim: 256
+  action_dim: 32
+train:
+  steps: 3000
+  batch_size: 16
+  lr: 0.0003
+  weight_decay: 0.01
+  warmup: 200
+  grad_clip: 1.0
+  frame_weight: 100.0
+  reward_weight: 1.0
+  reward_pos_weight: 20.0
+  eval_every: 250
+  log_every: 50
+  num_workers: 0
+  bf16: true
+data:
+  dir: data_short
+  train: train
+  val: val

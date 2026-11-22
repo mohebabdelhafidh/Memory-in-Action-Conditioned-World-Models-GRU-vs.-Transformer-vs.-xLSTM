@@ -55,8 +55,16 @@ def build_world_model(cfg: dict) -> WorldModel:
     elif kind == "memoryless":
         from models.cores.memoryless import MemorylessCore
         core = MemorylessCore(dim=c.get("dim", 256), hidden=c["hidden"])
+    elif kind == "transformer":
+        from models.cores.transformer import TransformerCore
+        core = TransformerCore(dim=c.get("dim", 256), out_dim=c["hidden"], layers=c.get("layers", 2),
+                               heads=c.get("heads", 4), mlp_ratio=c.get("mlp_ratio", 2))
+    elif kind == "xlstm":
+        from models.cores.xlstm_core import XLSTMCore
+        core = XLSTMCore(dim=c.get("dim", 288), out_dim=c["hidden"], blocks=c.get("blocks", 2),
+                         heads=c.get("heads", 4), context_length=c.get("context_length", 4096))
     else:
-        raise NotImplementedError(f"core type {kind!r} is not written yet (gru, memoryless are)")
+        raise NotImplementedError(f"core type {kind!r} is not written yet (gru, memoryless, transformer, xlstm are)")
     return WorldModel(core, latent_dim=m.get("latent_dim", 256), action_dim=m.get("action_dim", 32))
 
 
