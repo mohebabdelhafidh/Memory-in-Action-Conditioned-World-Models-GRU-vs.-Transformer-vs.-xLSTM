@@ -122,7 +122,7 @@ def main():
     log_dir.mkdir(parents=True, exist_ok=True)
 
     train_ds = EpisodeDataset(cfg["data"]["train"], cfg["data"]["dir"])
-    val_ds = EpisodeDataset(cfg["data"]["val"], cfg["data"]["dir"])
+    val_ds = EpisodeDataset(cfg["data"]["val"], cfg["data"].get("val_dir", cfg["data"]["dir"]))  # val_dir: optional separate folder
     bs = tc["batch_size"]
     if a.overfit:
         train_ds, bs = Subset(train_ds, range(8)), 8
@@ -133,7 +133,8 @@ def main():
                        persistent_workers=nw > 0)
     train_loader = DataLoader(train_ds, batch_size=bs, shuffle=not a.overfit, drop_last=not a.overfit,
                               generator=torch.Generator().manual_seed(seed), **loader_args)
-    val_loader = DataLoader(val_ds, batch_size=bs, shuffle=False, **loader_args)
+    val_bs = tc.get("val_batch_size", max(1, bs // 2))  # long-gap val episodes are big, so use smaller batches
+    val_loader = DataLoader(val_ds, batch_size=val_bs, shuffle=False, **loader_args)
 
     model = build_world_model(cfg).to(device)
     if a.init:
@@ -199,8 +200,10 @@ def main():
                 writer.writerow(row.keys()); wrote_header = True
             writer.writerow(row.values()); log_file.flush()
             ckpt_dir.mkdir(parents=True, exist_ok=True)
-            if res["total"] < best:
-                best = res["total"]
+            # model selection: lowest val loss (default) or highest pooled final_auc (tc["select"] = "auc")
+            score = res["total"] if tc.get("select", "loss") == "loss" else -res["final_auc"]
+            if not math.isnan(score) and score < best:
+                best = score
                 torch.save(dict(model=model.state_dict(), cfg=cfg, step=step), ckpt_dir / "best.pt")
             torch.save(dict(model=model.state_dict(), opt=opt.state_dict(), sched=sched.state_dict(),
                             step=step, best=best, cfg=cfg), ckpt_dir / "last.pt")

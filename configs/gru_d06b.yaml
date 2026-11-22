@@ -1,0 +1,28 @@
+name: gru_d06b
+seed: 0
+core:
+  type: gru
+  dim: 256        # width of the vectors fed into the core
+  hidden: 512     # belief-state size; tuned later so all cores match in parameter count
+  layers: 1
+model:
+  latent_dim: 256
+  action_dim: 32
+train:
+  steps: 8000
+  batch_size: 16          # lower to 8 if you run out of VRAM
+  lr: 3.0e-4
+  weight_decay: 0.01
+  warmup: 200
+  grad_clip: 1.0
+  frame_weight: 100.0     # frame MSE per pixel is tiny, so scale it up against the reward loss
+  reward_weight: 1.0
+  reward_pos_weight: 20.0 # rewards of 1 are ~0.3% of frames
+  eval_every: 500
+  log_every: 50
+  num_workers: 0
+  bf16: true
+data:
+  dir: data_d06b
+  train: train
+  val: val

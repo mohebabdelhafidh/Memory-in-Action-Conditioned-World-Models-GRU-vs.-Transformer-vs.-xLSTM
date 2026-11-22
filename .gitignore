@@ -16,3 +16,4 @@ data_test_long/
 results/logs/
 venv/
 wandb/
+data_d*/

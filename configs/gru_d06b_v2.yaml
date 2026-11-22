@@ -1,0 +1,30 @@
+name: gru_d06b_v2
+seed: 0
+core:
+  type: gru
+  dim: 256
+  hidden: 512
+  layers: 1
+model:
+  latent_dim: 256
+  action_dim: 32
+train:
+  steps: 8000
+  batch_size: 16
+  lr: 0.0003
+  weight_decay: 0.01
+  warmup: 200
+  grad_clip: 1.0
+  frame_weight: 100.0
+  reward_weight: 1.0
+  reward_pos_weight: 20.0
+  eval_every: 1000
+  log_every: 50
+  num_workers: 0
+  bf16: true
+  select: auc
+data:
+  dir: data_d06b
+  train: train
+  val: val
+  val_dir: data_d06b_val

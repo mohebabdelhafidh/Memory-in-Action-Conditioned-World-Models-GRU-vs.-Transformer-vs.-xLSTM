@@ -27,9 +27,11 @@ def main():
     ap.add_argument("--policy", choices=["random", "directed", "oracle"], default="oracle")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="results/figures")
+    ap.add_argument("--distractor-rate", type=float, default=0.0)
+    ap.add_argument("--distractor-size", type=int, default=1)
     a = ap.parse_args()
 
-    ep = rollout(a.gap, a.policy, a.seed)
+    ep = rollout(a.gap, a.policy, a.seed, distractor_rate=a.distractor_rate, distractor_size=a.distractor_size)
     obs, T = ep["obs"], len(ep["obs"])
     print(f"cue={COLOR_NAMES[ep['cue']]} gap={a.gap} frames={T} "
           f"reached={'none' if ep['reached'] < 0 else COLOR_NAMES[ep['reached']]} success={ep['success']} "
@@ -49,7 +51,7 @@ def main():
 
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    stem = f"cue_recall_gap{a.gap}_{a.policy}_s{a.seed}"
+    stem = f"cue_recall_gap{a.gap}_{a.policy}_s{a.seed}" + (f"_d{a.distractor_rate}x{a.distractor_size}" if a.distractor_rate else "")
     sheet.save(out / f"{stem}.png")
     gif = [Image.fromarray(f).resize((256, 256), Image.NEAREST) for f in obs]
     gif[0].save(out / f"{stem}.gif", save_all=True, append_images=gif[1:], duration=150, loop=0)
