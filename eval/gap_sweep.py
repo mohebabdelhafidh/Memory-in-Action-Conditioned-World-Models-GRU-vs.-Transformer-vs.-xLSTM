@@ -9,6 +9,7 @@ reward head only (no decoder), in fp32, so even 500-step episodes fit in VRAM.
     python eval/gap_sweep.py --ckpt checkpoints/memoryless_warm_s0/best.pt --data data_test   # negative control
 """
 import argparse
+import csv
 import sys
 from pathlib import Path
 
@@ -39,6 +40,7 @@ def main():
     ap.add_argument("--data", default="data_test")
     ap.add_argument("--split", default="test")
     ap.add_argument("--max-frames", type=int, default=1200, help="frames per forward pass (lower if out of VRAM)")
+    ap.add_argument("--csv", help="also write the per-gap table to this CSV file")
     a = ap.parse_args()
 
     dev = "cuda" if torch.cuda.is_available() else "cpu"
@@ -49,7 +51,7 @@ def main():
     print(f"{a.ckpt} (step {ck.get('step', '?')}) on {a.data}/{a.split}")
     print(f"{'gap':>5} {'reached':>8} {'correct':>8} {'AUC':>6}   95% CI")
 
-    all_s, all_y = [], []
+    all_s, all_y, rows = [], [], []
     base = EpisodeDataset(a.split, a.data)
     for g in sorted(set(base.meta["gap"].tolist())):
         ds = EpisodeDataset(a.split, a.data, gaps=[g])
@@ -69,6 +71,13 @@ def main():
         lo, hi = bootstrap_ci(scores, labels)
         print(f"{g:>5} {len(scores):>8} {int(labels.sum()):>8} {auc(scores, labels):>6.3f}   [{lo:.2f}, {hi:.2f}]")
         all_s.append(scores); all_y.append(labels)
+        rows.append(dict(gap=g, reached=len(scores), correct=int(labels.sum()), auc=auc(scores, labels), lo=lo, hi=hi))
+    if a.csv:
+        Path(a.csv).parent.mkdir(parents=True, exist_ok=True)
+        with open(a.csv, 'w', newline='') as f:
+            w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+            w.writeheader(); w.writerows(rows)
+        print(f'saved {a.csv}')
 
 
 if __name__ == "__main__":

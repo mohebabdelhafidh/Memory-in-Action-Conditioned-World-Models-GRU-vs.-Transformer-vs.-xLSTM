@@ -17,3 +17,5 @@ results/logs/
 venv/
 wandb/
 data_d*/
+results/planning_success.csv
+results/seeds/
