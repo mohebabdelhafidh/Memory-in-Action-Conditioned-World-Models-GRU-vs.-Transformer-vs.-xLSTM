@@ -49,7 +49,3 @@ One training seed per configuration, so treat results as indicative.
 | Hypotheses | H1 not supported, H2 supported (one-step mode), H3 partly supported, H4 consistent |
 
 **Next:** 3+ seeds per core, Theorical investigations of the results, experiment with other environments and other tasks.
-
-## Author
-
-Moheb Abdelhafidh · mouhebabdelhafidh20@gmail.com
