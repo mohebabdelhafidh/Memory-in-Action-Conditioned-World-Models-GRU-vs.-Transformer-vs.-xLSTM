@@ -1,0 +1,18 @@
+name: real_memoryless
+seed: 0
+core: {type: memoryless, dim: 256, hidden: 512}
+model: {latent_dim: 256, act_dim: 8, act_emb: 32, size: [64, 112]}
+train:
+  steps: 6000
+  batch_size: 8            # frames are larger than in the simulated task; raise it if VRAM allows
+  seq_len: 64
+  lr: 3.0e-4
+  weight_decay: 0.01
+  warmup: 200
+  grad_clip: 1.0
+  eval_every: 500
+  log_every: 50
+  bf16: true
+  blind: {p: 0.8, max_span: 16, min_visible: 4}   # observation dropout used during training
+  eval: {spans: [4, 8, 16, 32], s0: 8, max_windows: 100}
+data: {dir: data_real/droid_sample}

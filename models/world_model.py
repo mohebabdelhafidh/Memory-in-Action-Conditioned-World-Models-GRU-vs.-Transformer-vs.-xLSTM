@@ -46,8 +46,8 @@ class WorldModel(nn.Module):
         return self._heads(h, state)
 
 
-def build_world_model(cfg: dict) -> WorldModel:
-    c, m = cfg["core"], cfg["model"]
+def build_core(c: dict):
+    """Build a dynamics core from a config dict (shared by the simulated-task and the real-data world models)."""
     kind = c["type"]
     if kind == "gru":
         from models.cores.gru import GRUCore
@@ -65,6 +65,12 @@ def build_world_model(cfg: dict) -> WorldModel:
                          heads=c.get("heads", 4), context_length=c.get("context_length", 4096))
     else:
         raise NotImplementedError(f"core type {kind!r} is not written yet (gru, memoryless, transformer, xlstm are)")
+    return core
+
+
+def build_world_model(cfg: dict) -> WorldModel:
+    m = cfg["model"]
+    core = build_core(cfg["core"])
     return WorldModel(core, latent_dim=m.get("latent_dim", 256), action_dim=m.get("action_dim", 32))
 
 

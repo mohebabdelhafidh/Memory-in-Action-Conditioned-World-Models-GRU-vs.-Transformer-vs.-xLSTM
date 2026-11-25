@@ -3,6 +3,7 @@
 *.pyc
 *Zone.Identifier
 .ipynb_checkpoints/
+.venv-real/
 .venv/
 __pycache__/
 checkpoints/
@@ -10,12 +11,11 @@ data/*.npy
 data/*.npz
 data_big/
 data_ctrl/
+data_d*/
+data_real/
 data_short/
 data_test/
 data_test_long/
-results/logs/
+results/
 venv/
 wandb/
-data_d*/
-results/planning_success.csv
-results/seeds/
